@@ -12,16 +12,22 @@ class Endpoint(object):
     __str__ = __repr__
 
     @classmethod
-    def search(cls, qs, start=0, limit=100, deadline=0):
+    def search(cls, qs, start=0, limit=0, deadline=0):
         args = [deadline, ]
         for q in qs:
             args.append("%"+q+"%")
-        args += [start, limit]
 
         sql = '''select id, endpoint, ts from endpoint where ts > %s '''
+        flag = False
         for q in qs:
-            sql += ''' and endpoint like %s'''
-        sql += ''' limit %s,%s'''
+            if not flag:
+                sql += ''' and endpoint like %s'''
+                flag = True
+            else:
+                sql += ''' or endpoint like %s'''
+        if limit:
+            args += [start, limit]
+            sql += ''' limit %s,%s'''
 
         cursor = db_conn.execute(sql, args)
         rows = cursor.fetchall()

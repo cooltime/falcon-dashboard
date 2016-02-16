@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {%block title%}Falcon-Dashboard{%endblock%}
@@ -6,193 +5,161 @@
 {% block more_head %}
 {{super()}}
 
-<script src="/static/js/xperf.js?_v=0.1.0"></script>
-<script>
-
-        $(function(){
-            $("#check_all_endpoints").bind("click", fn_check_all_hosts);
-            $("#check_all_counters").bind("click", fn_check_all_items);
-            $("#endpoint-search").keydown(function(event){
-                if(event.keyCode == 13){
-                    fn_list_endpoints();
-                    event.preventDefault();
-                    return false;
-                }
-            });
-            $("#counter-search").keydown(function(event){
-                if(event.keyCode == 13){
-                    fn_list_counters();
-                    event.preventDefault();
-                    return false;
-                }
-            });
-            $("#counter-filter").keydown(function(event){
-                if(event.keyCode == 13){
-                    filter_counter();
-                    event.preventDefault();
-                    return false;
-                }
-            });
-            $("#tag-search").tokenfield();
-
-            $("#service-search").select2({
-                minimumInputLength: 3
-            });
-
-        })
-
-</script>
+<link href="/static/css/bootstrap-datetimepicker.css" rel="stylesheet">
+<script src="/static/js/bootstrap-datetimepicker.js"></script>
+<!-- <link href="/static/css/jquery.dataTables.css" rel="stylesheet"> -->
+<link href="/static/css/dataTables.bootstrap.min.css" rel="stylesheet">
+<link href="/static/css/animate.min.css" rel="stylesheet">
+<link href="/static/css/index.css?v=1" rel="stylesheet">
 {% endblock %}
 
-{%block body_head%} <body> {%endblock%}
+{% block body_head %} <body> {% endblock %}
 
-
-{%block navbar%}
-<nav class="navbar navbar-default" role="navigation" style="background-color: #fff;">
-<div class="container-fluid">
-    <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-        </button>
-        <a class="navbar-brand" href="/">Falcon-Dashboard</a>
-    </div>
-    <div class="collapse navbar-collapse navbar-ex1-collapse">
-        <ul class="nav navbar-nav navbar-right">
-          <li><a href="/screen">Screen</a></li>
-          <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">链接<span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu" style="font-size:12px;">
-                  <li><a href="https://github.com/open-falcon">fork me on Github</a></li>
-              </ul>
-          </li>
-        </ul>
-    </div>
-</div>
-</nav>
-{%endblock%}
 
 {% block container %}
-
-<div class="row">
-    {% block main_section%}
-    <div class="col-md-4">
-        <div class="row">
-            <div class="col-md-12" id="endpoints">
-                    <div class="panel panel-info">
-                        <div class="panel-heading">
-                            <img class="loading pull-right" src="/static/img/loading.gif" style="display:none;"></img>
-                            搜索Endpoints
-                        </div>
-
-                        <div class="panel-body">
-                            <form role="form">
-                                <div class="form-group">
-                                    <label>Endpoint</label>
-                                    <input id="endpoint-search" name="endpoint_search" type="text" class="form-control input-sm">
-                                    <p class="help-block"><span class="text-warning">可以用空格分割多个搜索关键字</span></p>
-                                </div>
-                                <div class="form-group">
-                                    <label>标签( eg: job=appstore-web)</label>
-                                    <input id="tag-search" name="tag_search" type="text" class="form-control input-sm">
-                                </div>
-                            </form>
-                            <form class="form-inline" role="form">
-                                <div class="form-group">
-                                    <button type="button" id="btn-search-endpoints" class="btn btn-default btn-sm" onclick="fn_list_endpoints();return false;">全局搜索</button>
-                                    <select class="form-control input-sm" id="endpoint-limit" onchange="fn_list_endpoints();return false;">
-                                        <option value="50"> Limit 50</option>
-                                        <option value="100">Limit 100</option>
-                                        <option value="500">Limit 500</option>
-                                    </select>
-                                </div>
-                            </form>
-                            <hr/>
-                            <form class="form-inline" role="form">
-                                <div class="form-group">
-                                    <input id="endpoint-filter" type="text" class="form-control input-sm">
-                                    <button class="btn btn-default btn-sm" onclick="filter_endpoint();return false;">快速过滤</button>
-                                </div>
-                            </form>
-
-                        </div>
-
-                        <table class="table table-striped">
-                            <thead> <tr>
-                                <th width="30px" colspan=2><input type="checkbox" id="check_all_endpoints"></th>
-                                <th><button class="btn btn-link btn-xs pull-right" onclick="fn_list_counters();return false;">刷新counter列表</button></th>
-                            </tr></thead>
-                            <tbody id="tbody-endpoints"> </tbody>
-                        </table>
-
-                    </div>
-                </div>
-
-            </div>
+<div id="header" class="header--fixed hide-from-print">
+    <div class="row">
+        <div class="col-md-4">
+            <select id="screenId"></select>
         </div>
-    {%endblock%}
-
-    {% block right_section%}
-    <div class="col-md-8">
-        <div class="row">
-                <div class="col-md-12" id="counters">
-
-                    <div class="panel panel-info">
-                        <div class="panel-heading">
-                            <img class="loading pull-right" src="/static/img/loading.gif" style="display:none;"></img>
-                            搜索Counters
-                        </div>
-
-                        <div class="panel-body">
-                            <form role="form">
-                                <div class="form-group">
-                                    <label>Counter</label>
-                                    <input id="counter-search" type="text" class="form-control input-sm">
-                                    <p class="help-block"><span class="text-warning">可以用空格分割多个搜索关键字</span></p>
-                                </div>
-                            </form>
-
-                            <form class="form-inline" role="form">
-                                <button class="btn btn-default btn-sm" onclick="fn_list_counters();return false;">搜索</button>
-                                <div class="form-group">
-                                    <select class="form-control input-sm" id="counter-limit" onchange="fn_list_counters();return false;">
-                                        <option value="50"> Limit 50</option>
-                                        <option value="100">Limit 100</option>
-                                        <option value="500">Limit 500</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <input id="counter-filter" type="text" class="form-control input-sm">
-                                    <button class="btn btn-default btn-sm" onclick="filter_counter();return false;">快速过滤</button>
-                                </div>
-
-                                <div class="dropdown form-group pull-right">
-                                    <a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" href="#"> 看图 <span class="caret"></span></a>
-                                    <ul class="dropdown-menu" role="menu">
-                                      <li><a href="#" class="btn btn-link btn-xs" onclick="fn_show_all('h');return false;">Endpoint视角</a></li>
-                                      <li><a href="#" class="btn btn-link btn-xs" onclick="fn_show_all('k');return false;">Counter视角</a></li>
-                                      <li><a href="#" class="btn btn-link btn-xs" onclick="fn_show_all('a');return false;">组合视角</a></li>
-                                    </ul>
-                                </div>
-
-                            </form>
-
-                        </div>
-
-                        <table class="table table-striped">
-                            <thead> <tr>
-                                <th width="30px"><input type="checkbox" id="check_all_counters"></th>
-                                <th >Counters</th>
-                                <th width="60px">类型</th>
-                                <th width="60px">频率</th>
-                            </tr></thead>
-
-                            <tbody id="tbody-counters"> </tbody>
-                        </table>
-                    </div>
-
-                </div>
+        <div class="col-md-offset-6 col-md-2">
+            <button type="button" class="btn btn-danger" id="hideOptions">隐藏选项</button>
+            <button type="button" class="btn btn-danger" id="showOptions">显示选项</button>
         </div>
     </div>
-    {% endblock %}
-
 </div>
+<div class='row graphs' id='graphs'>
+</div>
+    
+    <div class="row animated option--fixed" id="options">
+        {% block endpoints_section%}
+        <div class="col-md-3">
+            <div class="row">
+                <div class="col-md-12">
+                     <div class="panel panel-info">
+                         <div class="panel-heading">
+                             选择机器
+                         </div>
+                         <div class="panel-body">
+                             <div class="row">
+                                 <form role="form">
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            <select class="form-control input-sm" id="endpoints" multiple="multiple">
+                                                {%for endpoint in endpoints%}
+                                                <option value="{{endpoint}}">{{endpoint}}</option>
+                                                {%endfor%}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="row">
+                                <div>
+                                    <label>全选下列机器</label>
+                                    <div id="services"></div>
+                                </div>
+                            </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+        {%endblock%}
+    
+        {% block counter_section%}
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col-md-12">
+                     <div class="panel panel-info">
+                         <div class="panel-heading">
+                             选择监控项
+                         </div>
+                         <div class="panel-body">
+                             <div class="row">
+                                <div class="col-md-10">
+                                    <form role="form">
+                                        <div class="row">
+                                            <div class="form-group">
+                                                <div class="col-md-10">
+                                                    <select class="form-control input-sm" id="counters" multiple="multiple">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-primary" id="submit">查看</button>
+                                </div>
+                            </div>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+        </div>
+        {% endblock %}
+    
+        {% block time_section%}
+        <div class="col-md-5">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            选择时间
+                        </div>
+                        <div class="panel-body">
+                            <form role="form">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <label>开始时间</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" id="startTime" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>结束时间</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" id="endTime" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <button type="button" class="selectTime btn-default btn-sm" id="1h" data-value="3600">一小时</button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="selectTime btn-default btn-sm" id="6h" data-value="21600">六小时</button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="selectTime btn-default btn-sm" id="12h" data-value="43200">半天</button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="selectTime btn-default btn-sm" id="1d" data-value="86400">一天</button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="selectTime btn-default btn-sm" id="1w" data-value="604800">一周</button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn-info btn-sm" id="toLatest">最近</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endblock %}
+</div>
+
+<script src="/static/js/echarts.old.js"></script>
+<script src="/static/js/jquery.dataTables.js"></script>
+<script src="/static/js/dataTables.bootstrap.min.js"></script>
+<!-- <script src="/static/js/stickUp.min.js"></script> -->
+<script src="/static/js/headroom.js"></script>
+<script src="/static/js/jQuery.headroom.min.js"></script>
+<script src="/static/js/index.js?v=1.0.0.0"></script>
 {% endblock %}

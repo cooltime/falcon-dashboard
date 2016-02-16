@@ -11,8 +11,11 @@ from rrd import app
 from rrd.model.screen import DashboardScreen
 from rrd.model.graph import DashboardGraph
 from rrd import consts
-from rrd.utils.graph_urls import generate_graph_urls 
+from rrd.utils.graph_urls import generate_graph_urls
 from rrd import config
+import logging
+
+CB_PID = 9
 
 @app.route("/screen", methods=["GET", "POST"])
 def dash_screens():
@@ -250,21 +253,41 @@ def dash_graph_multi_edit():
         rows = []
         for x in jdata:
             rows.append({"id": x["id"], "hosts": x["endpoints"], "counters": x["counters"]})
-        DashboardGraph.update_multi(rows) 
+        DashboardGraph.update_multi(rows)
 
         return json.dumps({
              "ok": True,
              "msg": "",
         })
-        
+
     elif request.method == "GET":
         sid = request.args.get("sid")
         if not sid or not DashboardScreen.get(sid):
             ret["msg"] = "no_screen"
             return json.dumps(ret)
-        
+
         ret["ok"] = True
         graphs = DashboardGraph.gets_by_screen_id(sid)
         ret['data'] = [{"id": x.id, "title": x.title, "endpoints":x.hosts, "counters":x.counters} for x in graphs]
         return json.dumps(ret)
-    
+
+@app.route("/screen/data/<int:sid>")
+def dash_screen_data(sid):
+    ret = {}
+    screen = DashboardScreen.get(sid)
+    if not screen:
+        abort(404, "no screen")
+
+    graphs = DashboardGraph.gets_by_screen_id(sid)
+    ret['ok'] = True
+    ret['data'] = [{"endpoints" : graph.hosts, "counters" : graph.counters} for graph in graphs]
+
+    return json.dumps(ret)
+
+@app.route("/screen/data/cbscreens")
+def get_changba_screens():
+    ret = {}
+    screens = DashboardScreen.get_by_pid(CB_PID)
+    ret['ok'] = True
+    ret['data'] = [{"id" : screen.id, "name" : screen.name} for screen in screens]
+    return json.dumps(ret)

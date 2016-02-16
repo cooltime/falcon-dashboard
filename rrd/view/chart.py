@@ -69,7 +69,7 @@ def chart_before():
         g.limit = int(request.args.get("limit") or 0)
         g.page = int(request.args.get("page") or 0)
 
-@app.route("/chart", methods=["POST",])
+@app.route("/chart", methods=["POST","GET"])
 def chart():
     endpoints = request.form.getlist("endpoints[]") or []
     counters = request.form.getlist("counters[]") or []
@@ -308,8 +308,8 @@ def multi_chart_data():
                     "data": xv,
                     "name": "%s %s" %(query_result[i]["endpoint"], query_result[i]["counter"]),
                     "cf": g.cf,
-                    "endpoint": "",
-                    "counter": "",
+                    "endpoint": query_result[i]["endpoint"],
+                    "counter": query_result[i]["counter"],
             }
             series.append(serie)
         except:

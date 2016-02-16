@@ -19,11 +19,11 @@ def api_endpoints():
     q = request.args.get("q") or ""
     raw_tag = request.args.get("tags") or ""
     tags = raw_tag and [x.strip() for x in raw_tag.split(",")] or []
-    limit = int(request.args.get("limit") or 100)
+    limit = int(request.args.get("limit") or 0)
 
-    if not q and not tags:
-        ret["msg"] = "no query params given"
-        return json.dumps(ret)
+#    if not q and not tags:
+#        ret["msg"] = "no query params given"
+#        return json.dumps(ret)
     
     endpoints = []
 
@@ -51,8 +51,7 @@ def api_get_counters():
         "msg": "",
         "data": [],
     }
-    endpoints = request.form.get("endpoints") or ""
-    endpoints = endpoints and json.loads(endpoints)
+    endpoints = request.form.getlist("endpoints[]") or []
     q = request.form.get("q") or ""
     limit = int(request.form.get("limit") or 100)
 
@@ -104,3 +103,25 @@ def api_create_tmpgraph():
         return json.dumps(ret)
     else:
         return json.dumps(ret)
+
+@app.route("/api/fake/getservices", methods = ["GET", "POST"])
+def api_fake_get_services():
+    ret = {
+            "errno": 10000,
+            "data": ['GET', 'FRONT']
+    }
+
+    return json.dumps(ret)
+
+@app.route("/api/fake/gethostsbyservice", methods = ["GET", "POST"])
+def api_fake_get_hosts_by_service():
+    serviceName = request.values['serviceName']
+    ret = {
+        "errno": 10000
+    }
+    if serviceName == 'GET':
+        ret['data'] = ["host18", "host19", "host21", "host35", "host36", "host37", "host38", "host40", "host41", "host58", "host68", "host70", "host71", "host75", "host87", "host92", "host94", "host95", "host96", "host103", "host105", "host110", "host116", "host118", "host119", "host123", "host126", "host127", "host132", "host158", "host160", "host167", "host168", "host169", "host178", "host181", "host182", "host192", "host193", "host197", "host198", "host199", "host201", "host202", "host203"]
+    elif serviceName == 'FRONT':
+        ret['data'] = ["host76", "host88", "host89", "host124", "host144", "host148"]
+    
+    return json.dumps(ret)

@@ -55,3 +55,10 @@ class DashboardScreen(object):
         db_conn.execute('''update dashboard_screen set pid=%s, name=%s where id=%s''', (pid, name, self.id))
         db_conn.commit()
         return DashboardScreen.get(self.id)
+
+    @classmethod
+    def get_by_pid(cls, id):
+        cursor = db_conn.execute('''select id, pid, name, time from dashboard_screen where pid=%s''', (id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return [cls(*row) for row in rows]

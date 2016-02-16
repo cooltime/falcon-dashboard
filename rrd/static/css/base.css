@@ -261,3 +261,8 @@ a.tab_current:hover {
     color:#ACABAB;
     font-size:11px;
 }
+tr.legend{font-weight: normal;margin-right: 5px;font-size: 12px;cursor: pointer;}
+tr.legend.disabled{color: #d3d3d3 !important;}
+tr.legend.disabled .label{background-color: #d3d3d3 !important;}
+tr.legend .label{width: 12px;height: 8px;margin-right: 5px;vertical-align: middle;margin-bottom: 2px;}
+tr.legend .label:empty{display: inline-block;}

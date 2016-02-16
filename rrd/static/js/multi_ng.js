@@ -80,7 +80,7 @@ function MultiCtrl(FlotServ, $scope, $interval, $timeout) {
         }
         FlotServ.getMultiDataById(p).then(function(ret) {
             // [{data: {}}, {data: {}}, {data: {}}]
-            // console.log(ret);
+             console.log(ret);
             var data;
             data = _.map(ret, function(i) {
                 var o = {};
@@ -88,7 +88,7 @@ function MultiCtrl(FlotServ, $scope, $interval, $timeout) {
                 o.title = i.data.title;
                 return o;
             });
-            // console.log(data);
+             console.log(data);
             vm.configs = data;
         });
     }
